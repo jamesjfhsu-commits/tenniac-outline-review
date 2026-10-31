@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>泳・網直前｜訪綱共編</title>
+  <link rel="stylesheet" href="./assets/vendor/lil-gui/lil-gui.min.css">
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./assets/vendor/three/three.module.js","three/addons/OrbitControls.js":"./assets/vendor/three/OrbitControls.js","lil-gui":"./assets/vendor/lil-gui/lil-gui.esm.min.js"}}</script>
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="hero"><div class="wrap"><div class="hero-heading"><div><p class="eyebrow">網球愛客 PODCAST · 訪談共編</p><h1>泳・網直前｜訪綱共編</h1><p id="episode-title" class="subtitle"></p><span id="status" class="chip"></span></div><img class="hero-sticker" src="./assets/stickers/hello.webp" alt="" width="180" height="180"></div><dl id="meta" class="meta"></dl><p class="intro">請在每一段選擇：保留／要修改／有疑問，並補上你的故事，最後寄回 Tenniac。</p></div></header>
+  <main class="wrap">
+    <section id="court" class="court-section" aria-labelledby="court-heading"><div class="section-top"><div><p class="eyebrow">THE STORY ROUTE</p><h2 id="court-heading">這集的故事球路</h2></div><button id="reset-camera" type="button">重設視角</button></div><div id="court-canvas" role="img" aria-label="立體網球場，球依序經過 OPEN、Topic 1、Topic 2、Topic 3、新聞五站"></div><nav id="court-stops" aria-label="故事球路五站"></nav><details id="style-panel"><summary>調整球場與閱讀樣式</summary><div id="gui"></div></details></section>
+    <div id="outline"></div>
+    <section id="story" class="story-section"><div class="illustrated-heading"><div><p class="eyebrow">COMPLETE THE STORY</p><h2>一起完成這個故事</h2></div><img class="section-sticker" src="./assets/stickers/heart.webp" alt="" width="72" height="72" loading="lazy"></div><label for="story-fill">如果你也覺得出國很遙遠，先從＿＿開始。</label><input id="story-fill" type="text" placeholder="填上你的答案"><label for="story-line">這集最想讓聽眾帶走的一句話</label><textarea id="story-line" rows="3"></textarea></section>
+    <section id="send" class="send-section"><div class="illustrated-heading"><div><p class="eyebrow">YOUR FEEDBACK</p><h2>把想法送回 Tenniac</h2></div><img class="section-sticker" src="./assets/stickers/wink.webp" alt="" width="72" height="72" loading="lazy"></div><div id="send-complete" class="send-complete" hidden><img id="send-cool" src="./assets/stickers/cool.webp" alt="" width="72" height="72" loading="lazy" hidden><strong>全部完成！記得寄回 Tenniac</strong></div><div class="identity"><div><label for="name">名字 <span aria-hidden="true">*</span></label><input id="name" autocomplete="name" required></div><div><label for="role">身分</label><select id="role"><option value="">請選擇</option><option>主持人</option><option>來賓</option><option>其他</option></select></div></div><h3>回饋預覽</h3><pre id="preview" tabindex="0" aria-live="polite"></pre><p id="message" role="status"></p><div class="actions"><button id="mail" class="primary" type="button">寄給 Tenniac</button><button id="copy" type="button">複製回饋</button><button id="download" type="button">下載 .txt</button><button id="clear" type="button">清除我的回饋</button></div></section>
+  </main><footer><div class="wrap">網球愛客 · 讓每一段運動故事被聽見<br><small>吉祥物：網球愛客貼圖</small></div></footer>
+</body></html>
