@@ -3,7 +3,7 @@
 在專案根目錄重新產生資料：
 
 ```sh
-python -X utf8 _review_site/tools/build_outline.py 泳網直前_青年百億/訪綱_修訂草稿.md
+python -X utf8 _review_site/tools/build_outline.py episodes/EPxxx_泳網直前_青年百億/訪綱_修訂草稿.md
 ```
 
 在 `_review_site` 目錄預覽：
