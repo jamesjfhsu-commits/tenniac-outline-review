@@ -13,6 +13,7 @@ function attachMusic(tl, audio, button, reduced = false) {
   host.classList.remove('gate-host');
  };
  const showGate = () => {
+  tl.timeScale(1);
   gate.hidden = false; bubble.hidden = false;
   host.classList.add('gate-host');
   gsap.set(host,{autoAlpha:1,x:0,y:0,rotation:-6,scale:1});
@@ -45,19 +46,37 @@ function attachMusic(tl, audio, button, reduced = false) {
   button.setAttribute('aria-pressed', String(on));
   button.textContent = on ? '🔇 關配樂' : '🔊 開配樂';
  };
- let lastCheck = 0;
- const startAt = t => { audio.currentTime = t; tl.time(t); return audio.play(); };
+ let lastCheck = 0, lastFrame = performance.now();
+ const stats = {corrections:0, largest:0, long:0};
+ const debug = new URLSearchParams(location.search).get('debug') === 'sync';
+ const overlay = debug ? document.createElement('output') : null;
+ if (overlay) { overlay.className='sync-debug'; stage.append(overlay); }
+ const paintStats = () => { if(overlay) overlay.textContent=`sync corrections: ${stats.corrections} | largest: ${stats.largest.toFixed(3)} s | long frames > 50 ms: ${stats.long}`; };
+ paintStats();
+ const startAt = t => { tl.timeScale(1); audio.currentTime = t; tl.time(t); return audio.play(); };
  const sync = () => {
+  const frame = performance.now();
+  if (overlay && !tl.paused() && !document.hidden && frame-lastFrame>50) stats.long++;
+  lastFrame=frame; paintStats();
   if (!on || held || reduced || document.hidden || audio.paused || tl.paused() || tl.progress() >= 1) return;
   const now = performance.now();
-  if (now - lastCheck < 1000) return;
+  if (now - lastCheck < 250) return;
   lastCheck = now;
-  if (Math.abs(audio.currentTime - tl.time()) > 0.35) tl.time(audio.currentTime);
+  const drift = tl.time() - audio.currentTime;
+  if (Math.abs(drift)>1) {
+   stats.corrections++; stats.largest=Math.max(stats.largest,Math.abs(drift));
+   tl.timeScale(1); tl.time(audio.currentTime);
+  } else {
+   const rate = Math.abs(drift)<.05 ? 1 : 1-gsap.utils.clamp(-.1,.1,drift*.5);
+   if(rate!==1) { stats.corrections++; stats.largest=Math.max(stats.largest,Math.abs(drift)); }
+   tl.timeScale(rate);
+  }
+  paintStats();
  };
  gsap.ticker.add(sync);
  const toggle = () => {
   on = !on; render();
-  if (!on) { audio.pause(); return; }
+  if (!on) { tl.timeScale(1); audio.pause(); return; }
   held = false;
   if (!reduced && tl.progress() >= 1) tl.restart();
   startAt(reduced ? 0 : tl.time()).catch(() => { on=false; audio.pause(); render(); });
@@ -83,14 +102,17 @@ function attachMusic(tl, audio, button, reduced = false) {
    begin().catch(() => { tl.pause(0); showGate(); });
   },
   stop() {
+   tl.timeScale(1);
    hideGate();
    held = true; audio.pause();
   },
   restart() {
+   tl.timeScale(1);
    held = false;
    if (on) {audio.currentTime=0; if (!document.hidden) play();}
   },
   destroy() {
+   tl.timeScale(1); overlay?.remove();
    held=true; gsap.ticker.remove(sync); audio.pause();
    button.removeEventListener('click', toggle);
    document.removeEventListener('visibilitychange', visibility);
@@ -128,7 +150,6 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
  }
  tl.set(star,{x:()=>stage.clientWidth/2,rotation:-3},0)
   .to(q('.cone'),{autoAlpha:.45,stagger:.56,duration:.6},.2)
-  .to(star,{rotation:3,duration:.4,repeat:3,yoyo:true},.7)
   .fromTo(q('.blush'),{scale:.6,autoAlpha:0},{scale:1.5,autoAlpha:.8,duration:1.2},.8)
   .to(q('.sweat'),{autoAlpha:1,y:8,duration:.6},1.3)
   .to(star,{x:0,rotation:0,duration:1},3.5)
@@ -181,6 +202,9 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
   if (i===2 && Math.abs(at-9.7)<.001) child.startTime(16);
  });
 
+ tl.getChildren(false,true,false).forEach(child=>{
+  if (Math.abs(child.startTime()-(9.5+2.44*4/3.5))<.0001 && child.duration()===0 && child.targets().some(e=>e.classList?.contains('pose'))) child.startTime(12.3);
+ });
  // Absolute clip times: plugin travel and hold motion stay deterministic on seek.
  tl.to(q('.pick-xiaoxin'),{motionPath:{path:[{x:0,y:0},{x:60,y:-65},{x:stage.clientWidth<=600?82.5:99,y:stage.clientWidth<=600?160:210}],curviness:1.5},scale:.3,duration:.8,ease:'power2.inOut'},11.5)
   .to(q('.pick-xiaoxin'),{autoAlpha:0,duration:.15},12.3)
@@ -226,6 +250,12 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
  const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(visible&&tl.progress()===1&&!reduced)breath.play();else breath.pause();});observer.observe(stage);
  document.querySelector('#skip-opening').onclick=()=>{music.stop();tl.progress(1).pause();};
  document.querySelector('#replay-opening').onclick=()=>{breath.pause().progress(0);music.restart();if(!reduced)tl.restart();};
- if(reduced)tl.progress(1).pause();else music.start();
- return()=>{music.destroy();observer.disconnect();breath.kill();tl.kill();};
+ let disposed=false;
+ const decoded = Promise.allSettled([...stage.querySelectorAll('img')].map(i=>i.decode()));
+ let decodeTimer;
+ Promise.race([decoded,new Promise(resolve=>{decodeTimer=setTimeout(resolve,1500);})]).then(()=>{
+  clearTimeout(decodeTimer);
+  if(!disposed) { if(reduced)tl.progress(1).pause();else music.start(); }
+ });
+ return()=>{disposed=true;clearTimeout(decodeTimer);music.destroy();observer.disconnect();breath.kill();tl.kill();};
 });
