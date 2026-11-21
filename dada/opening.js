@@ -1,4 +1,5 @@
 // Clip time equals timeline time; the final fade continues after the 25 s story.
+gsap.registerPlugin(SplitText, MotionPathPlugin);
 gsap.ticker.lagSmoothing(0);
 function attachMusic(tl, audio, button, reduced = false) {
  let on = !reduced, held = false;
@@ -99,6 +100,8 @@ function attachMusic(tl, audio, button, reduced = false) {
 // Finite, seekable story; pose switches are sets at the squash, never crossfades.
 const stage = document.querySelector('#opening');
 const q = s => stage.querySelectorAll(s);
+const titleSplit = SplitText.create('.title-lines', {type:'lines', linesClass:'title-line'});
+const cheerSplit = SplitText.create('.opening-title h1', {type:'chars', smartWrap:true});
 const mm = gsap.matchMedia();
 mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-motion: no-preference)'}, context => {
  const reduced = context.conditions.reduce;
@@ -134,8 +137,7 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
  swap('question',3.5);
  tl.to(star,{x:-22,rotation:-4,duration:.36},5.2).to(star,{x:22,rotation:4,duration:.36},5.56)
   .to(q('.floating-sticker'),{y:-6,duration:.36,repeat:1,yoyo:true},4.7)
-  .to(q('.pick-xiaoxin'),{y:110,scale:.3,autoAlpha:0,duration:.6},5.3)
-  .to(q('.pick-xiaobai,.pick-quiet'),{autoAlpha:0,duration:.6},5.5)
+
   .to(star,{x:0,rotation:0,duration:.6},5.92)
   .fromTo(q('.hearts'),{y:0,autoAlpha:1},{y:-60,autoAlpha:0,duration:1.2,immediateRender:false},6);
  swap('heart',5.7);
@@ -153,11 +155,11 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
   .to(q('.nice'),{autoAlpha:0,duration:.4},10.6)
   .to(q('.court-board'),{autoAlpha:.22,duration:.6},11)
   .fromTo(q('.friend'),{scale:0,y:25,autoAlpha:0},{scale:1,y:0,autoAlpha:1,stagger:.24,duration:.6,ease:'back.out(2)'},11);
- q('.friend').forEach((friend,i)=>tl.to(friend.querySelectorAll('[id$="arm-l"],[id$="arm-r"]'),{rotation:i%2?-18:18,svgOrigin:'100 130',duration:.5},11.4+i*.2));
+ q('.friend').forEach((friend,i)=>tl.to(friend,{rotation:i%2?-12:12,y:-10,duration:.3,repeat:1,yoyo:true},11.4+i*.2));
  swap('jump',11);
  tl.to(star,{y:-45,duration:.48},11.9).to(star,{y:0,scaleX:1.1,scaleY:.88,duration:.44,ease:'power2.in'},12.38).to(star,{scaleX:1,scaleY:1,duration:.4},12.82)
   .set(q('.opening-title'),{autoAlpha:1},11.3)
-  .fromTo(q('.opening-title h1 span'),{y:12,autoAlpha:0},{y:0,autoAlpha:1,stagger:.06,duration:.4},11.3);
+  .fromTo(cheerSplit.chars,{y:12,autoAlpha:0},{y:0,autoAlpha:1,stagger:.06,duration:.4},11.3);
  q('.confetti').forEach((piece,i)=>tl.fromTo(piece,{x:0,y:0,scale:0,autoAlpha:0},{x:Math.sin(i*2.4)*stage.clientWidth*.42,y:-70-(i%5)*30,rotation:(i*137)%360,scale:1,autoAlpha:1,duration:.7},11.7).to(piece,{y:100,autoAlpha:0,duration:1.5},12.4));
  swap('hello',14);
  tl.to(star,{rotation:-6,duration:.32},15.7).to(star,{rotation:6,duration:.3,repeat:1,yoyo:true},16.02)
@@ -178,18 +180,34 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
   if (i===2 && Math.abs(at-9.44)<.001) child.startTime(16);
   if (i===2 && Math.abs(at-9.7)<.001) child.startTime(16);
  });
+
+ // Absolute clip times: plugin travel and hold motion stay deterministic on seek.
+ tl.to(q('.pick-xiaoxin'),{motionPath:{path:[{x:0,y:0},{x:60,y:-65},{x:stage.clientWidth<=600?82.5:99,y:stage.clientWidth<=600?160:210}],curviness:1.5},scale:.3,duration:.8,ease:'power2.inOut'},11.5)
+  .to(q('.pick-xiaoxin'),{autoAlpha:0,duration:.15},12.3)
+  .to(q('.pick-xiaobai,.pick-quiet'),{scale:1.15,duration:.12},11.5)
+  .to(q('.pick-xiaobai,.pick-quiet'),{scale:0,autoAlpha:0,duration:.45,ease:'back.in(1.7)'},11.62)
+  .set(poses,{autoAlpha:0},13.5).set(q('[data-pose="run"]'),{autoAlpha:1},13.5)
+  .fromTo(star,{x:-80},{x:0,duration:.7,immediateRender:false},13.5)
+  .set(q('.opening-title'),{autoAlpha:0},21.5);
+ for(const [start,end] of [[6.3,9.45],[21.8,25]]){
+  tl.fromTo(star,{scale:1},{scale:1.03,duration:1.6,repeat:1,yoyo:true,ease:'sine.inOut',immediateRender:false},start);
+  tl.fromTo(star,{rotation:-3},{rotation:3,duration:.8,repeat:2,yoyo:true,ease:'sine.inOut',immediateRender:false},start);
+  for(let t=start+.6;t+.16<end;t+=2.2)tl.to(star,{scaleY:.94,duration:.08},t).to(star,{scaleY:1,duration:.08},t+.08);
+ }
  newStarts.forEach((at,i)=>tl.addLabel('s'+(i+1),at));
  tl.addLabel('title',0);
  gsap.set(star,{autoAlpha:0});
  tl.set(star,{autoAlpha:0},0).set(star,{autoAlpha:1},5.5);
  tl.fromTo(q('.stage-top>span'),{autoAlpha:0},{autoAlpha:1,duration:.3},5.5);
  tl.set(q('.title-card'),{autoAlpha:1},0);
+ tl.set(q('.bulb'),{opacity:.25,boxShadow:'0 0 0px 0px #ffd27a'},0);
  // Positive y points down: each landing is y=0, with diminishing height.
  const ball=q('.prop-ball');
  tl.set(ball,{x:()=>-stage.clientWidth*.55,y:-180,autoAlpha:1},0)
   .to(ball,{x:0,duration:3,ease:'none'},0);
  for(let i=0;i<6;i++){
   const landing=(i+1)*.5, height=150-i*23;
+  tl.set(q('.bulb')[i],{opacity:1,boxShadow:'0 0 12px 4px #ffd27a'},landing);
   if(i)tl.to(ball,{y:-height,duration:.25,ease:'power2.out'},landing-.5);
   tl.to(ball,{y:0,duration:i?.25:.5,ease:'power2.in'},i?landing-.25:0)
    .set(ball,{scaleX:1.25,scaleY:.75},landing)
@@ -197,7 +215,7 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
  }
  tl.to(ball,{autoAlpha:0,duration:.2},3.2)
   .fromTo(q('.title-brand'),{y:-15,autoAlpha:0},{y:0,autoAlpha:1,duration:.35},3)
-  .fromTo(q('.title-lines span'),{scale:.7,y:15,autoAlpha:0},{scale:1,y:0,autoAlpha:1,stagger:.18,duration:.4,ease:'back.out(1.7)'},3.05)
+  .fromTo(titleSplit.lines,{scale:.7,y:15,autoAlpha:0},{scale:1,y:0,autoAlpha:1,stagger:.18,duration:.4,ease:'back.out(1.7)'},3.05)
   .fromTo(q('.title-guest'),{y:20,autoAlpha:0},{y:0,autoAlpha:1,duration:.35},3.45)
   .to(q('.title-card'),{autoAlpha:0,y:-25,duration:.5},5)
   .set({}, {},25);
