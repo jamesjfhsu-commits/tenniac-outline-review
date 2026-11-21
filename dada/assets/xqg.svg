@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-25 -5 310 250" width="220" height="240" role="img" aria-label="小球怪">
+  <defs>
+    <radialGradient id="xqg-grad" cx="38%" cy="32%" r="70%">
+      <stop offset="0" stop-color="#e4ec6a" /><stop offset=".65" stop-color="#cbdc48" /><stop offset="1" stop-color="#9ab83a" />
+    </radialGradient>
+  </defs>
+  <g id="xqg" class="xqg" style="transform-origin:100px 190px">
+    <ellipse id="xqg-shadow" cx="100" cy="228" rx="46" ry="7" fill="#1f2a24" opacity=".15" />
+    <g id="xqg-leg-l" style="transform-origin:84px 186px"><path d="M84 186 L84 210" stroke="#6f9a2a" stroke-width="15" stroke-linecap="round" /><path d="M84 186 L84 210" stroke="#c4d846" stroke-width="9" stroke-linecap="round" /><g transform="translate(40 201)"><path d="M0 22 q0 -24 26 -22 q18 2 22 14 q14 2 14 10 v4 h-62 z" fill="#2f6db0" stroke="#1d4f9a" stroke-width="2" /><rect x="-2" y="26" width="66" height="8" rx="4" fill="#fff" stroke="#c9ced2" stroke-width="1.5" /><path d="M18 6 l8 6 M24 2 l8 6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" /></g></g>
+    <g id="xqg-leg-r" style="transform-origin:116px 186px"><path d="M116 186 L116 210" stroke="#6f9a2a" stroke-width="15" stroke-linecap="round" /><path d="M116 186 L116 210" stroke="#c4d846" stroke-width="9" stroke-linecap="round" /><g transform="translate(108 201)"><path d="M0 22 q0 -24 26 -22 q18 2 22 14 q14 2 14 10 v4 h-62 z" fill="#2f6db0" stroke="#1d4f9a" stroke-width="2" /><rect x="-2" y="26" width="66" height="8" rx="4" fill="#fff" stroke="#c9ced2" stroke-width="1.5" /><path d="M18 6 l8 6 M24 2 l8 6" stroke="#fff" stroke-width="2.5" stroke-linecap="round" /></g></g>
+    <g id="xqg-arm-l" style="transform-origin:52px 130px"><path d="M52 130 q-30 -10 -40 -40" stroke="#6f9a2a" stroke-width="15" fill="none" stroke-linecap="round" /><path d="M52 130 q-30 -10 -40 -40" stroke="#c4d846" stroke-width="10" fill="none" stroke-linecap="round" /><circle cx="12" cy="90" r="11" fill="#cbdc48" stroke="#6f9a2a" stroke-width="3" /></g>
+    <g id="xqg-body" style="transform-origin:100px 128px">
+      <circle cx="100" cy="128" r="62" fill="url(#xqg-grad)" stroke="#6f9a2a" stroke-width="3" />
+      <path d="M44 104 q30 22 0 56" stroke="#f4f4e6" stroke-width="5" fill="none" stroke-linecap="round" />
+      <path d="M156 104 q-30 22 0 56" stroke="#f4f4e6" stroke-width="5" fill="none" stroke-linecap="round" />
+    </g>
+    <g id="xqg-face" style="transform-origin:100px 128px">
+      <g id="xqg-eyes" style="transform-origin:100px 124px">
+        <g id="xqg-eye-l" style="transform-origin:84px 124px"><ellipse cx="84" cy="124" rx="10" ry="13" fill="#1f2a24" /><circle cx="87.5" cy="119" r="4" fill="#fff" /><circle cx="81" cy="129" r="1.8" fill="#fff" /></g>
+        <g id="xqg-eye-r" style="transform-origin:116px 124px"><ellipse cx="116" cy="124" rx="10" ry="13" fill="#1f2a24" /><circle cx="119.5" cy="119" r="4" fill="#fff" /><circle cx="113" cy="129" r="1.8" fill="#fff" /></g>
+      </g>
+      <g id="xqg-lids" style="transform-origin:100px 112px;transform:scaleY(0)"><ellipse cx="84" cy="124" rx="10" ry="13" fill="#cbdc48" /><ellipse cx="116" cy="124" rx="10" ry="13" fill="#cbdc48" /></g>
+      <ellipse cx="72" cy="140" rx="12" ry="7" fill="#f6a3a0" opacity=".85" />
+      <ellipse cx="128" cy="140" rx="12" ry="7" fill="#f6a3a0" opacity=".85" />
+      <g id="xqg-mouth" style="transform-origin:100px 145px"><path d="M92 143 q8 9 16 0" stroke="#1f2a24" stroke-width="3" fill="none" stroke-linecap="round" /></g><g id="xqg-mouth-open" opacity="0" style="transform-origin:100px 147px"><path d="M90 142 h20 q-1 18 -10 16 q-9 0 -10 -16" fill="#783b37" stroke="#1f2a24" stroke-width="2" /><path d="M95 152 q5 -5 10 0" stroke="#ef807d" stroke-width="4" stroke-linecap="round" /></g>
+    </g>
+    <g id="xqg-sticker-slot" style="transform-origin:100px 170px" />
+    <g id="xqg-cap" style="transform-origin:100px 90px">
+      <path d="M46 96 C47 39 141 35 155 97 Q104 83 46 96 Z" fill="#1d4f9a" stroke="#6f9a2a" stroke-width="3" />
+      <path d="M49 86 Q92 73 133 91 Q110 110 67 99 Q28 112 36 99 Z" fill="#3078a8" stroke="#6f9a2a" stroke-width="3" />
+      <text x="100" y="84" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#fff">T</text>
+    </g>
+    <g id="xqg-arm-r" style="transform-origin:148px 130px">
+      <path d="M148 130 q18 -4 26 -20" stroke="#6f9a2a" stroke-width="15" fill="none" stroke-linecap="round" /><path d="M148 130 q18 -4 26 -20" stroke="#c4d846" stroke-width="10" fill="none" stroke-linecap="round" /><g id="xqg-racket" style="transform-origin:174px 110px">
+        <g transform="translate(174 -10)"><rect x="-5" y="92" width="10" height="44" rx="4" fill="#1d4f9a" /><path d="M-5 100 h10 M-5 110 h10 M-5 120 h10" stroke="#3078a8" stroke-width="2" /><path d="M0 92 V74" stroke="#f07818" stroke-width="7" stroke-linecap="round" /><ellipse cx="0" cy="40" rx="26" ry="36" fill="#fff" fill-opacity=".5" stroke="#f07818" stroke-width="7" /><g stroke="#9aa3a8" stroke-width="1.5"><path d="M-13 9 V71 M0 5 V75 M13 9 V71 M-24 22 H24 M-26 40 H26 M-24 58 H24" /></g></g></g>
+      <circle cx="174" cy="110" r="11" fill="#cbdc48" stroke="#6f9a2a" stroke-width="3" /></g>
+  </g>
+</svg>

@@ -1,5 +1,11 @@
 # 訪綱共編頁
 
+達達頁面資料：
+
+```sh
+python -X utf8 _review_site/tools/build_outline.py "episodes/EPxxx_達達運動/訪綱_草稿.md" _review_site/dada/outline.js
+```
+
 在專案根目錄重新產生資料：
 
 ```sh

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import argparse
 
 import pypdfium2 as pdfium
 
@@ -24,7 +25,7 @@ PICK = {
 }
 
 
-def main(source, output):
+def main(source, output, max_size=320):
     # Validate every position before writing any output.
     document = pdfium.PdfDocument(open(source, "rb").read())
     page = document[0]
@@ -41,11 +42,18 @@ def main(source, output):
         bounds = image.getchannel("A").getbbox()
         assert bounds is not None, f"{name}: empty transparent image"
         image = image.crop(bounds)
-        image.thumbnail((320, 320))
+        image.thumbnail((max_size, max_size))
         image.save(os.path.join(output, f"{name}.webp"), "WEBP", quality=82, method=6)
     total = sum(os.path.getsize(os.path.join(output, f"{name}.webp")) for name in PICK)
     print(f"Extracted {len(PICK)} stickers; total {total} bytes")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('source')
+    parser.add_argument('output')
+    parser.add_argument('--max', type=int, default=320, dest='max_size')
+    args = parser.parse_args()
+    if args.max_size < 1:
+        parser.error('--max must be positive')
+    main(args.source, args.output, args.max_size)
