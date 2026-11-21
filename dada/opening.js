@@ -200,14 +200,15 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
  tl.set(star,{autoAlpha:0},0).set(star,{autoAlpha:1},5.5);
  tl.fromTo(q('.stage-top>span'),{autoAlpha:0},{autoAlpha:1,duration:.3},5.5);
  tl.set(q('.title-card'),{autoAlpha:1},0);
- tl.set(q('.bulb'),{opacity:.25,boxShadow:'0 0 0px 0px #ffd27a'},0);
+ tl.set(q('.lamp-bulb'),{attr:{class:'lamp-bulb'},scale:1},0);
  // Positive y points down: each landing is y=0, with diminishing height.
  const ball=q('.prop-ball');
  tl.set(ball,{x:()=>-stage.clientWidth*.55,y:-180,autoAlpha:1},0)
   .to(ball,{x:0,duration:3,ease:'none'},0);
  for(let i=0;i<6;i++){
   const landing=(i+1)*.5, height=150-i*23;
-  tl.set(q('.bulb')[i],{opacity:1,boxShadow:'0 0 12px 4px #ffd27a'},landing);
+  tl.set(q('.lamp-bulb')[i],{attr:{class:'lamp-bulb is-on'},scale:1.15},landing)
+   .to(q('.lamp-bulb')[i],{scale:1,duration:.12},landing);
   if(i)tl.to(ball,{y:-height,duration:.25,ease:'power2.out'},landing-.5);
   tl.to(ball,{y:0,duration:i?.25:.5,ease:'power2.in'},i?landing-.25:0)
    .set(ball,{scaleX:1.25,scaleY:.75},landing)
