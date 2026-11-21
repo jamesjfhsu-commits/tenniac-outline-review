@@ -1,4 +1,5 @@
 // Clip time equals timeline time; the final fade continues after the 25 s story.
+gsap.ticker.lagSmoothing(0);
 function attachMusic(tl, audio, button, reduced = false) {
  let on = !reduced, held = false;
  const gate = document.querySelector('[data-start]');
@@ -35,7 +36,7 @@ function attachMusic(tl, audio, button, reduced = false) {
   wave?.kill(); bob?.kill(); bubble.hidden=true;
   host.classList.remove('gate-host');
  };
- audio.volume = 0.6;
+ audio.volume = 1;
  const play = () => audio.play().catch(() => {
   on = false; audio.pause(); render();
  });
@@ -43,24 +44,28 @@ function attachMusic(tl, audio, button, reduced = false) {
   button.setAttribute('aria-pressed', String(on));
   button.textContent = on ? '🔇 關配樂' : '🔊 開配樂';
  };
- const resetFade = () => { gsap.killTweensOf(audio); audio.volume = 0.6; };
+ let lastCheck = 0;
+ const startAt = t => { audio.currentTime = t; tl.time(t); return audio.play(); };
  const sync = () => {
-  if (!on || held || reduced || document.hidden || tl.progress() >= 1) return;
-  if (Math.abs(audio.currentTime - tl.time()) > 0.15) audio.currentTime = tl.time();
-  if (audio.paused && !tl.paused()) play();
+  if (!on || held || reduced || document.hidden || audio.paused || tl.paused() || tl.progress() >= 1) return;
+  const now = performance.now();
+  if (now - lastCheck < 1000) return;
+  lastCheck = now;
+  if (Math.abs(audio.currentTime - tl.time()) > 0.35) tl.time(audio.currentTime);
  };
- tl.eventCallback('onUpdate', sync);
+ gsap.ticker.add(sync);
  const toggle = () => {
-  on = !on; render(); resetFade();
+  on = !on; render();
   if (!on) { audio.pause(); return; }
   held = false;
   if (!reduced && tl.progress() >= 1) tl.restart();
-  audio.currentTime = reduced ? 0 : tl.time();
-  play();
+  startAt(reduced ? 0 : tl.time()).catch(() => { on=false; audio.pause(); render(); });
  };
  const visibility = () => {
   if (document.hidden) audio.pause();
-  else if (on && !held && !tl.paused() && tl.progress() < 1) sync();
+  else if (on && !held && !tl.paused() && tl.progress() < 1) {
+   audio.currentTime = tl.time(); play();
+  }
  };
  button.addEventListener('click', toggle);
  document.addEventListener('visibilitychange', visibility);
@@ -70,23 +75,22 @@ function attachMusic(tl, audio, button, reduced = false) {
    if (reduced) return;
    render();
    const begin = (clicked = false) => {
-    on = true; held = false; render(); audio.currentTime = 0;
-    return audio.play().then(() => { if(clicked)exitGate();else hideGate(); tl.restart(); });
+    on = true; held = false; render();
+    return startAt(0).then(() => { if(clicked)exitGate();else hideGate(); tl.restart(); });
    };
    gate.onclick = () => { begin(true).catch(() => { showGate(); }); };
    begin().catch(() => { tl.pause(0); showGate(); });
   },
   stop() {
    hideGate();
-   held = true; resetFade();
-   gsap.to(audio, {volume:0, duration:0.4, onComplete:() => {audio.pause(); audio.volume=0.6;}});
+   held = true; audio.pause();
   },
   restart() {
-   held = false; resetFade();
+   held = false;
    if (on) {audio.currentTime=0; if (!document.hidden) play();}
   },
   destroy() {
-   held=true; resetFade(); audio.pause();
+   held=true; gsap.ticker.remove(sync); audio.pause();
    button.removeEventListener('click', toggle);
    document.removeEventListener('visibilitychange', visibility);
   }
