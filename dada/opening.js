@@ -2,7 +2,39 @@
 function attachMusic(tl, audio, button, reduced = false) {
  let on = !reduced, held = false;
  const gate = document.querySelector('[data-start]');
- const hideGate = () => { gate.hidden = true; };
+ const host = document.querySelector('#star');
+ const bubble = document.querySelector('.gate-bubble');
+ let wave, bob;
+ const hideGate = () => {
+  gate.hidden = true; bubble.hidden = true;
+  wave?.kill(); bob?.kill();
+  host.classList.remove('gate-host');
+ };
+ const showGate = () => {
+  gate.hidden = false; bubble.hidden = false;
+  host.classList.add('gate-host');
+  gsap.set(host,{autoAlpha:1,x:0,y:0,rotation:-6,scale:1});
+  if (!reduced) {
+   wave=gsap.to(host,{rotation:6,duration:.8,repeat:-1,yoyo:true,ease:'sine.inOut'});
+   bob=gsap.to(bubble,{y:-4,duration:.8,repeat:-1,yoyo:true,ease:'sine.inOut'});
+  }
+ };
+ const exitGate = () => {
+  // A disposable visual keeps the hop independent of seekable scene state.
+  const hop=host.cloneNode(true);
+  hop.removeAttribute('id'); hop.className='gate-host gate-exit';
+  hop.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));
+  host.parentElement.append(hop);
+  gsap.set(hop,{x:0,y:0,rotation:0,autoAlpha:1});
+  gsap.timeline({onComplete:()=>hop.remove()})
+   .to(hop,{scaleX:1.15,scaleY:.8,duration:.08})
+   .to(hop,{x:stage.clientWidth,y:-65,scaleX:.95,scaleY:1.05,duration:.22,ease:'power2.out'})
+   .to(hop,{y:20,duration:.14,ease:'power2.in'});
+  gsap.to(bubble,{scale:0,autoAlpha:0,duration:.15});
+  gsap.to(gate,{scale:0,autoAlpha:0,duration:.18,onComplete:()=>{gate.hidden=true;}});
+  wave?.kill(); bob?.kill(); bubble.hidden=true;
+  host.classList.remove('gate-host');
+ };
  audio.volume = 0.6;
  const play = () => audio.play().catch(() => {
   on = false; audio.pause(); render();
@@ -37,12 +69,12 @@ function attachMusic(tl, audio, button, reduced = false) {
   start() {
    if (reduced) return;
    render();
-   const begin = () => {
+   const begin = (clicked = false) => {
     on = true; held = false; render(); audio.currentTime = 0;
-    return audio.play().then(() => { hideGate(); tl.restart(); });
+    return audio.play().then(() => { if(clicked)exitGate();else hideGate(); tl.restart(); });
    };
-   gate.onclick = () => { begin().catch(() => { gate.hidden = false; }); };
-   begin().catch(() => { tl.pause(0); gate.hidden = false; });
+   gate.onclick = () => { begin(true).catch(() => { showGate(); }); };
+   begin().catch(() => { tl.pause(0); showGate(); });
   },
   stop() {
    hideGate();
@@ -144,6 +176,7 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
  });
  newStarts.forEach((at,i)=>tl.addLabel('s'+(i+1),at));
  tl.addLabel('title',0);
+ gsap.set(star,{autoAlpha:0});
  tl.set(star,{autoAlpha:0},0).set(star,{autoAlpha:1},5.5);
  tl.fromTo(q('.stage-top>span'),{autoAlpha:0},{autoAlpha:1,duration:.3},5.5);
  tl.set(q('.title-card'),{autoAlpha:1},0);

@@ -55,3 +55,11 @@
 @media(prefers-reduced-motion:reduce){#opening [data-start]{display:none;animation:none}}
 
 .cheer-readable{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* Gate-only composition; scene positioning resumes when playback starts. */
+#opening [data-start]{left:42%;top:calc(46% - 80px);width:160px;height:160px;font-size:18px}
+#opening #star.gate-host,#opening .gate-exit{position:absolute;z-index:10;left:calc(42% + 108px);top:calc(46% - 90px);width:170px;height:170px;transform-origin:50% 100%;will-change:transform}
+.gate-bubble{position:absolute;z-index:11;left:calc(42% + 108px);top:calc(46% - 150px);background:#fffaf0;color:#12324a;padding:10px 14px;border-radius:18px;font-weight:800;white-space:nowrap;transform-origin:50% 100%}
+.gate-bubble:after{content:'';position:absolute;top:100%;left:40%;border:10px solid transparent;border-top-color:#fffaf0;border-bottom:0}
+.gate-bubble[hidden]{display:none}
+@media(max-width:600px){#opening [data-start]{left:34%;top:calc(46% - 66px);width:132px;height:132px;font-size:15px;padding:8px}#opening #star.gate-host,#opening .gate-exit{left:calc(34% + 80px);top:calc(46% - 64px);width:130px;height:130px}.gate-bubble{left:calc(34% + 72px);top:calc(46% - 122px);font-size:14px;padding:9px 10px}}
