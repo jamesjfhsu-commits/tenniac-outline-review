@@ -23,7 +23,7 @@ ANIMATION = """size => {
         timeline.seek(time);
         results[label] = test();
     }
-    check(11.45, 'three cards, correct size, contained and separated', () => {
+    check(10.3, 'three cards, correct size, contained and separated', () => {
         const boxes = cards.map(card => card.getBoundingClientRect());
         return cards.length === 3 && cards.every(visible) &&
             boxes.every((box, i) => inside(box) &&
@@ -38,7 +38,7 @@ ANIMATION = """size => {
     }
     let overlapCount = 0;
     let layered = true;
-    for (let frame = 690; frame <= 786; frame++) {
+    for (let frame = 690; frame <= 720; frame++) {
         timeline.seek(frame / 60);
         const box = white.getBoundingClientRect();
         if (visible(white) && overlap(box, mascot.getBoundingClientRect())) {
@@ -49,19 +49,31 @@ ANIMATION = """size => {
     }
     results[`white card wins hit testing on ${overlapCount} overlapping frames`] =
         overlapCount > 0 && layered;
-    check(11.6, 'white card stamped', () => visible(select('.party-stamp')));
-    check(12.1, 'other cards hidden', () => cards.filter(card => card !== white)
+    check(10.9, 'white card stamped', () => visible(select('.party-stamp')));
+    check(11.4, 'other cards hidden', () => cards.filter(card => card !== white)
         .every(card => !visible(card)));
-    check(12.35, 'wink before card exits', () => pose('wink') && visible(white) &&
-        overlap(white.getBoundingClientRect(), stage));
-    check(13.05, 'white card outside stage', () => white.getBoundingClientRect().left >= stage.right);
-    check(13.1, 'white card hidden', () => !visible(white));
+    check(12.05, 'white outfit visible at hand-off', () => pose('whites'));
+    check(12.15, 'all cards hidden', () => cards.every(card => !visible(card)));
+    check(13.25, 'white outfit still visible', () => pose('whites'));
+    check(13.45, 'scene two cleared', () => !pose('whites') && !pose('question') &&
+        cards.every(card => !visible(card)) &&
+        [...document.querySelectorAll('.outfit-sparkles i')].every(spark => !visible(spark)));
     check(13.5, 'scene three starts with run', () => timeline.labels.s3 === 13.5 && pose('run'));
     check(15.99, 'ball held until drop', () => !visible(select('#ball')));
     check(16, 'serve and ball launch on drop', () => pose('serve') && visible(select('#ball')));
     const origin = select('#ball').getBoundingClientRect().left;
     check(16.1, 'ball advances after serve', () => select('#ball').getBoundingClientRect().left > origin);
     results['25-second timeline'] = timeline.duration() === 25;
+    timeline.seek(20);
+    const cheer = select('.opening-title h1');
+    const lineCount = Math.round(cheer.clientHeight / parseFloat(getComputedStyle(cheer).lineHeight));
+    results[`cheer: ${lineCount} lines, scrollWidth=${cheer.scrollWidth}, clientWidth=${cheer.clientWidth}`] =
+        lineCount >= 1 && lineCount <= 2 && cheer.scrollWidth <= cheer.clientWidth &&
+        cheer.textContent === '讓運動成為生活的一部分！';
+    results['title and sticky header match the slogan'] =
+        document.title === '達達運動｜讓運動成為生活的一部分' &&
+        select('.episode-header').textContent === document.title &&
+        getComputedStyle(select('.episode-header')).position === 'sticky';
     return results;
 }"""
 
@@ -90,7 +102,7 @@ def main():
             check(width, "skip ends the timeline", page.evaluate("window.__opening.time() === 25"))
             page.locator("#replay-opening").click()
             check(width, "replay starts again", page.evaluate("window.__opening.time() < 5"))
-            page.evaluate("() => { window.__opening.pause().seek(11.45); }")
+            page.evaluate("() => { window.__opening.pause().seek(10.3); }")
             cards = page.locator(".party-card:visible")
             check(width, "all three cards restored on replay", cards.count() == 3)
 

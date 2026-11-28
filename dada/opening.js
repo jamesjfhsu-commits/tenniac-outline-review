@@ -129,7 +129,7 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
  const reduced = context.conditions.reduce;
  const star=q('#star'), poses=q('.pose');
  gsap.set(poses,{autoAlpha:0});gsap.set(q('[data-pose="hello"]'),{autoAlpha:1});
- gsap.set(q('.court-wash,.cone,.party-card,.party-stamp,.court-board,.friend,.confetti,.opening-title,.speech,.opening-cta,#replay-opening,.nice,.blush,.sweat,#ball'),{autoAlpha:0});
+ gsap.set(q('.court-wash,.cone,.party-card,.party-stamp,.outfit-sparkles i,.court-board,.friend,.confetti,.opening-title,.speech,.opening-cta,#replay-opening,.nice,.blush,.sweat,#ball'),{autoAlpha:0});
  const tl=gsap.timeline({paused:true,defaults:{duration:.3,ease:'power2.out'}});
  window.__opening=tl;
  const music=attachMusic(tl,stage.querySelector('#opening-music'),stage.querySelector('[data-sound]'),reduced);
@@ -153,13 +153,8 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
   .fromTo(q('.blush'),{scale:.6,autoAlpha:0},{scale:1.5,autoAlpha:.8,duration:1.2},.8)
   .to(q('.sweat'),{autoAlpha:1,y:8,duration:.6},1.3)
   .to(star,{x:0,rotation:0,duration:1},3.5)
-  .to(q('.blush,.sweat'),{autoAlpha:0,duration:.6},3.5)
-  .fromTo(q('.party-card'),{y:-70,autoAlpha:0},{y:0,autoAlpha:1,stagger:.2,duration:.8},3.5);
+  .to(q('.blush,.sweat'),{autoAlpha:0,duration:.6},3.5);
  swap('question',3.5);
- tl.to(star,{x:-22,rotation:-4,duration:.36},5.2).to(star,{x:22,rotation:4,duration:.36},5.56)
-  .to(q('.party-card'),{y:-6,duration:.36,repeat:1,yoyo:true},4.7)
-
-  .to(star,{x:0,rotation:0,duration:.6},5.92);
  tl.to(q('.court-wash'),{autoAlpha:1,duration:.8},7)
   .to(q('.lamp'),{autoAlpha:0,duration:.6},7)
   .fromTo(q('.court-board'),{y:30,autoAlpha:0},{y:0,autoAlpha:1,duration:.6},7);
@@ -202,15 +197,26 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
 
  // Absolute clip times keep the party selection reversible on seek.
  const whiteCard=stage.querySelector('.party-card-white');
- tl.set(q('.party-stamp'),{autoAlpha:1},11.5)
-  .to(whiteCard,{scale:1.16,y:48,duration:.12},11.5)
-  .to(q('.party-card-single,.party-card-after'),{scale:0,autoAlpha:0,duration:.45,ease:'back.in(1.7)'},11.62)
-  .set(poses,{autoAlpha:0},12.3).set(q('[data-pose="wink"]'),{autoAlpha:1},12.3)
+ const sparks=q('.outfit-sparkles i');
+ tl.fromTo(q('.party-card'),{y:-70,autoAlpha:0},
+    {y:0,autoAlpha:1,stagger:.12,duration:.56,immediateRender:false},9.5)
+  .to(star,{x:-20,rotation:-4,duration:.2},10.4)
+  .to(star,{x:20,rotation:4,duration:.2},10.6)
+  .to(star,{x:0,rotation:0,duration:.24},10.8)
+  .set(q('.party-stamp'),{autoAlpha:1},10.8)
+  .to(whiteCard,{scale:1.16,duration:.12},10.8)
+  .to(q('.party-card-single,.party-card-after'),{scale:0,autoAlpha:0,duration:.45,ease:'back.in(1.7)'},10.9)
   .to(whiteCard,{
-   x:()=>stage.clientWidth-parseFloat(getComputedStyle(whiteCard).left)+whiteCard.clientWidth*.08+8,
-   y:28,duration:.75,ease:'power2.inOut'
-  },12.3)
-  .set(whiteCard,{autoAlpha:0},13.1)
+   y:()=>star[0].offsetTop+star[0].offsetHeight*.48-parseFloat(getComputedStyle(whiteCard).top)-whiteCard.clientHeight/2,
+   duration:.5,ease:'power2.inOut'
+  },11.5)
+  .to(whiteCard,{autoAlpha:0,duration:.14},12)
+  .set(poses,{autoAlpha:0},12).set(q('[data-pose="whites"]'),{autoAlpha:1},12)
+  .to(star,{y:-16,rotation:-5,duration:.23},12)
+  .to(star,{y:0,rotation:0,duration:.32,ease:'back.out(1.5)'},12.23)
+  .fromTo(sparks,{scale:.25,autoAlpha:0},{scale:1,autoAlpha:1,duration:.15,stagger:.08,immediateRender:false},12)
+  .to(sparks,{scale:.5,autoAlpha:0,duration:.35,stagger:.08},12.55)
+  .set(poses,{autoAlpha:0},13.3)
   .set(poses,{autoAlpha:0},13.5).set(q('[data-pose="run"]'),{autoAlpha:1},13.5)
   .fromTo(star,{x:-80},{x:0,duration:.7,immediateRender:false},13.5)
   .set(q('.opening-title'),{autoAlpha:0},21.5);
