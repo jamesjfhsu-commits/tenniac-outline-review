@@ -1,5 +1,5 @@
 // Clip time equals timeline time; the final fade continues after the 25 s story.
-gsap.registerPlugin(SplitText, MotionPathPlugin);
+gsap.registerPlugin(SplitText);
 gsap.ticker.lagSmoothing(0);
 function attachMusic(tl, audio, button, reduced = false) {
  let on = !reduced, held = false;
@@ -129,7 +129,7 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
  const reduced = context.conditions.reduce;
  const star=q('#star'), poses=q('.pose');
  gsap.set(poses,{autoAlpha:0});gsap.set(q('[data-pose="hello"]'),{autoAlpha:1});
- gsap.set(q('.court-wash,.cone,.floating-sticker,.court-board,.friend,.confetti,.opening-title,.speech,.opening-cta,#replay-opening,.nice,.hearts,.blush,.sweat,#ball'),{autoAlpha:0});
+ gsap.set(q('.court-wash,.cone,.party-card,.party-stamp,.court-board,.friend,.confetti,.opening-title,.speech,.opening-cta,#replay-opening,.nice,.blush,.sweat,#ball'),{autoAlpha:0});
  const tl=gsap.timeline({paused:true,defaults:{duration:.3,ease:'power2.out'}});
  window.__opening=tl;
  const music=attachMusic(tl,stage.querySelector('#opening-music'),stage.querySelector('[data-sound]'),reduced);
@@ -154,14 +154,12 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
   .to(q('.sweat'),{autoAlpha:1,y:8,duration:.6},1.3)
   .to(star,{x:0,rotation:0,duration:1},3.5)
   .to(q('.blush,.sweat'),{autoAlpha:0,duration:.6},3.5)
-  .fromTo(q('.floating-sticker'),{y:-70,autoAlpha:0},{y:0,autoAlpha:1,stagger:.2,duration:.8},3.5);
+  .fromTo(q('.party-card'),{y:-70,autoAlpha:0},{y:0,autoAlpha:1,stagger:.2,duration:.8},3.5);
  swap('question',3.5);
  tl.to(star,{x:-22,rotation:-4,duration:.36},5.2).to(star,{x:22,rotation:4,duration:.36},5.56)
-  .to(q('.floating-sticker'),{y:-6,duration:.36,repeat:1,yoyo:true},4.7)
+  .to(q('.party-card'),{y:-6,duration:.36,repeat:1,yoyo:true},4.7)
 
-  .to(star,{x:0,rotation:0,duration:.6},5.92)
-  .fromTo(q('.hearts'),{y:0,autoAlpha:1},{y:-60,autoAlpha:0,duration:1.2,immediateRender:false},6);
- swap('heart',5.7);
+  .to(star,{x:0,rotation:0,duration:.6},5.92);
  tl.to(q('.court-wash'),{autoAlpha:1,duration:.8},7)
   .to(q('.lamp'),{autoAlpha:0,duration:.6},7)
   .fromTo(q('.court-board'),{y:30,autoAlpha:0},{y:0,autoAlpha:1,duration:.6},7);
@@ -202,14 +200,17 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
   if (i===2 && Math.abs(at-9.7)<.001) child.startTime(16);
  });
 
- tl.getChildren(false,true,false).forEach(child=>{
-  if (Math.abs(child.startTime()-(9.5+2.44*4/3.5))<.0001 && child.duration()===0 && child.targets().some(e=>e.classList?.contains('pose'))) child.startTime(12.3);
- });
- // Absolute clip times: plugin travel and hold motion stay deterministic on seek.
- tl.to(q('.pick-xiaoxin'),{motionPath:{path:[{x:0,y:0},{x:60,y:-65},{x:stage.clientWidth<=600?82.5:99,y:stage.clientWidth<=600?160:210}],curviness:1.5},scale:.3,duration:.8,ease:'power2.inOut'},11.5)
-  .to(q('.pick-xiaoxin'),{autoAlpha:0,duration:.15},12.3)
-  .to(q('.pick-xiaobai,.pick-quiet'),{scale:1.15,duration:.12},11.5)
-  .to(q('.pick-xiaobai,.pick-quiet'),{scale:0,autoAlpha:0,duration:.45,ease:'back.in(1.7)'},11.62)
+ // Absolute clip times keep the party selection reversible on seek.
+ const whiteCard=stage.querySelector('.party-card-white');
+ tl.set(q('.party-stamp'),{autoAlpha:1},11.5)
+  .to(whiteCard,{scale:1.16,y:48,duration:.12},11.5)
+  .to(q('.party-card-single,.party-card-after'),{scale:0,autoAlpha:0,duration:.45,ease:'back.in(1.7)'},11.62)
+  .set(poses,{autoAlpha:0},12.3).set(q('[data-pose="wink"]'),{autoAlpha:1},12.3)
+  .to(whiteCard,{
+   x:()=>stage.clientWidth-parseFloat(getComputedStyle(whiteCard).left)+whiteCard.clientWidth*.08+8,
+   y:28,duration:.75,ease:'power2.inOut'
+  },12.3)
+  .set(whiteCard,{autoAlpha:0},13.1)
   .set(poses,{autoAlpha:0},13.5).set(q('[data-pose="run"]'),{autoAlpha:1},13.5)
   .fromTo(star,{x:-80},{x:0,duration:.7,immediateRender:false},13.5)
   .set(q('.opening-title'),{autoAlpha:0},21.5);
