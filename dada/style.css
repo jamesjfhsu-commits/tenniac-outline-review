@@ -83,3 +83,9 @@
 .outfit-sparkles i:nth-child(2){top:246px;left:calc(50% + 58px);font-size:22px}
 .outfit-sparkles i:nth-child(3){top:198px;left:calc(50% + 15px);font-size:18px}
 #opening .opening-title{max-width:calc(100% - 48px)}
+
+/* Match the serve pose's source-pixel scale and its bottom edge. */
+#star .whites-pose{inset:auto;left:50%;height:auto;bottom:calc((35 - 24) / 920 * 100%);translate:-50% 0}
+.whites-pose[data-pose=whites-toss]{width:calc(529 / 460 * 100%)}
+.whites-pose[data-pose=whites-hit]{width:calc(546 / 460 * 100%)}
+.whites-pose[data-pose=whites-cheer]{width:calc(491 / 460 * 100%)}

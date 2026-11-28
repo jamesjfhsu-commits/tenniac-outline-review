@@ -52,10 +52,15 @@ ANIMATION = """size => {
     check(10.9, 'white card stamped', () => visible(select('.party-stamp')));
     check(11.4, 'other cards hidden', () => cards.filter(card => card !== white)
         .every(card => !visible(card)));
-    check(12.05, 'white outfit visible at hand-off', () => pose('whites'));
+    const beats = ['toss', 'hit', 'cheer'];
+    for (const [beat, times] of [['toss', [12.05, 12.5]], ['hit', [12.65, 12.85]],
+                                 ['cheer', [12.95, 13.25]]]) {
+        for (const time of times) check(time, beat + ' alone at ' + time, () =>
+            beats.every(other => pose('whites-' + other) === (other === beat)));
+    }
     check(12.15, 'all cards hidden', () => cards.every(card => !visible(card)));
-    check(13.25, 'white outfit still visible', () => pose('whites'));
-    check(13.45, 'scene two cleared', () => !pose('whites') && !pose('question') &&
+    check(13.45, 'scene two cleared', () => beats.every(beat => !pose('whites-' + beat)) &&
+        !pose('question') &&
         cards.every(card => !visible(card)) &&
         [...document.querySelectorAll('.outfit-sparkles i')].every(spark => !visible(spark)));
     check(13.5, 'scene three starts with run', () => timeline.labels.s3 === 13.5 && pose('run'));

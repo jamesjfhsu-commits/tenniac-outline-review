@@ -53,13 +53,27 @@ function attachMusic(tl, audio, button, reduced = false) {
  if (overlay) { overlay.className='sync-debug'; stage.append(overlay); }
  const paintStats = () => { if(overlay) overlay.textContent=`sync corrections: ${stats.corrections} | largest: ${stats.largest.toFixed(3)} s | long frames > 50 ms: ${stats.long}`; };
  paintStats();
- const startAt = t => { tl.timeScale(1); audio.currentTime = t; tl.time(t); return audio.play(); };
+ let alignFrom = null;
+ const startAt = t => {
+  tl.timeScale(1);
+  audio.currentTime = t;
+  tl.time(t);
+  alignFrom = t;
+  return audio.play();
+ };
  const sync = () => {
   const frame = performance.now();
   if (overlay && !tl.paused() && !document.hidden && frame-lastFrame>50) stats.long++;
   lastFrame=frame; paintStats();
   if (!on || held || reduced || document.hidden || audio.paused || tl.paused() || tl.progress() >= 1) return;
   const now = performance.now();
+  if (alignFrom !== null) {
+   if (audio.seeking || audio.currentTime <= alignFrom) return;
+   alignFrom = null;
+   tl.time(audio.currentTime);
+   lastCheck = now;
+   return;
+  }
   if (now - lastCheck < 250) return;
   lastCheck = now;
   const drift = tl.time() - audio.currentTime;
@@ -84,6 +98,7 @@ function attachMusic(tl, audio, button, reduced = false) {
  const visibility = () => {
   if (document.hidden) audio.pause();
   else if (on && !held && !tl.paused() && tl.progress() < 1) {
+   alignFrom = null;
    audio.currentTime = tl.time(); play();
   }
  };
@@ -109,7 +124,10 @@ function attachMusic(tl, audio, button, reduced = false) {
   restart() {
    tl.timeScale(1);
    held = false;
-   if (on) {audio.currentTime=0; if (!document.hidden) play();}
+   if (on) {
+    if (document.hidden) audio.currentTime = 0;
+    else startAt(0).catch(() => { on=false; audio.pause(); render(); });
+   }
   },
   destroy() {
    tl.timeScale(1); overlay?.remove();
@@ -211,11 +229,19 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
    duration:.5,ease:'power2.inOut'
   },11.5)
   .to(whiteCard,{autoAlpha:0,duration:.14},12)
-  .set(poses,{autoAlpha:0},12).set(q('[data-pose="whites"]'),{autoAlpha:1},12)
-  .to(star,{y:-16,rotation:-5,duration:.23},12)
-  .to(star,{y:0,rotation:0,duration:.32,ease:'back.out(1.5)'},12.23)
-  .fromTo(sparks,{scale:.25,autoAlpha:0},{scale:1,autoAlpha:1,duration:.15,stagger:.08,immediateRender:false},12)
-  .to(sparks,{scale:.5,autoAlpha:0,duration:.35,stagger:.08},12.55)
+  .set(poses,{autoAlpha:0},12).set(q('[data-pose="whites-toss"]'),{autoAlpha:1},12)
+  .to(star,{y:-9,duration:.24,ease:'sine.out'},12)
+  .to(star,{y:0,duration:.36,ease:'sine.inOut'},12.24)
+  .set(poses,{autoAlpha:0},12.6).set(q('[data-pose="whites-hit"]'),{autoAlpha:1},12.6)
+  .to(star,{y:-20,duration:.12,ease:'power2.out'},12.6)
+  .to(star,{y:0,scaleX:1.04,scaleY:.94,duration:.14,ease:'power2.in'},12.72)
+  .to(star,{scaleX:1,scaleY:1,duration:.04},12.86)
+  .set(poses,{autoAlpha:0},12.9).set(q('[data-pose="whites-cheer"]'),{autoAlpha:1},12.9)
+  .set(star,{scale:.9},12.9)
+  .to(star,{scale:1.05,duration:.11},12.9)
+  .to(star,{scale:1,duration:.17,ease:'sine.inOut'},13.01)
+  .fromTo(sparks,{scale:.25,autoAlpha:0},{scale:1,autoAlpha:1,duration:.12,stagger:.04,immediateRender:false},12.9)
+  .to(sparks,{scale:.5,autoAlpha:0,duration:.16,stagger:.04},13.15)
   .set(poses,{autoAlpha:0},13.3)
   .set(poses,{autoAlpha:0},13.5).set(q('[data-pose="run"]'),{autoAlpha:1},13.5)
   .fromTo(star,{x:-80},{x:0,duration:.7,immediateRender:false},13.5)
