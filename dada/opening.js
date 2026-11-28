@@ -1,4 +1,4 @@
-// Clip time equals timeline time; the final fade continues after the 25 s story.
+// Clip time equals timeline time; the final fade continues after the 33 s story.
 gsap.registerPlugin(SplitText);
 gsap.ticker.lagSmoothing(0);
 function attachMusic(tl, audio, button, reduced = false) {
@@ -157,7 +157,7 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
  const captions=q('.caption-scene');
  gsap.set(captions,{autoAlpha:0,y:8});
  captions.forEach((cap,i)=>{
-  if(i)tl.to(captions[i-1],{autoAlpha:0,y:-4,duration:.2},starts[i]);
+  if(i && i!==2)tl.to(captions[i-1],{autoAlpha:0,y:-4,duration:.2},starts[i]);
   tl.fromTo(cap,{autoAlpha:0,y:8},{autoAlpha:1,y:0,duration:.4,immediateRender:false},starts[i]);
  });
  function swap(name,at){
@@ -172,7 +172,6 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
   .to(q('.sweat'),{autoAlpha:1,y:8,duration:.6},1.3)
   .to(star,{x:0,rotation:0,duration:1},3.5)
   .to(q('.blush,.sweat'),{autoAlpha:0,duration:.6},3.5);
- swap('question',3.5);
  tl.to(q('.court-wash'),{autoAlpha:1,duration:.8},7)
   .to(q('.lamp'),{autoAlpha:0,duration:.6},7)
   .fromTo(q('.court-board'),{y:30,autoAlpha:0},{y:0,autoAlpha:1,duration:.6},7);
@@ -201,52 +200,71 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
   .to(q('#skip-opening'),{autoAlpha:0,duration:.6},16)
   .set({}, {},17);
  // Map each original scene to its specified slower interval, including pose holds.
- const oldStarts=[0,3.5,7,11,14], newStarts=[5.5,9.5,13.5,18,21.5], lengths=[4,4,4.5,3.5,3.5], oldLengths=[3.5,3.5,4,3,3];
+ const oldStarts=[0,3.5,7,11,14], newStarts=[5.5,9.5,21.5,26,29.5], lengths=[4,3.5,4.5,3.5,3.5], oldLengths=[3.5,3.5,4,3,3];
  tl.getChildren(false,true,true).forEach(child=>{
   const at=child.startTime();
   const i=Math.max(0,oldStarts.findLastIndex(t=>at>=t));
   const ratio=lengths[i]/oldLengths[i];
   child.duration(child.duration()*ratio);
   child.startTime(newStarts[i]+(at-oldStarts[i])*ratio);
-  // Serve pose and launch share the song drop at 16 seconds.
-  if (i===2 && Math.abs(at-9.44)<.001) child.startTime(16);
-  if (i===2 && Math.abs(at-9.7)<.001) child.startTime(16);
+  // Serve pose and launch share the 24-second downbeat.
+  if (i===2 && Math.abs(at-9.44)<.001) child.startTime(24);
+  if (i===2 && Math.abs(at-9.7)<.001) child.startTime(24);
  });
 
  // Absolute clip times keep the party selection reversible on seek.
  const whiteCard=stage.querySelector('.party-card-white');
  const sparks=q('.outfit-sparkles i');
- tl.fromTo(q('.party-card'),{y:-70,autoAlpha:0},
-    {y:0,autoAlpha:1,stagger:.12,duration:.56,immediateRender:false},9.5)
-  .to(star,{x:-20,rotation:-4,duration:.2},10.4)
-  .to(star,{x:20,rotation:4,duration:.2},10.6)
-  .to(star,{x:0,rotation:0,duration:.24},10.8)
-  .set(q('.party-stamp'),{autoAlpha:1},10.8)
-  .to(whiteCard,{scale:1.16,duration:.12},10.8)
-  .to(q('.party-card-single,.party-card-after'),{scale:0,autoAlpha:0,duration:.45,ease:'back.in(1.7)'},10.9)
+ q('.party-card').forEach((card,i)=>{
+  tl.fromTo(card,{y:-45,autoAlpha:0},{y:0,autoAlpha:1,duration:.45,
+   ease:'back.out(1.2)',immediateRender:false},9.5+i*.5);
+ });
+ const partyPose = (name,at) => {
+  tl.set(poses,{autoAlpha:0},at).set(q(`[data-pose="${name}"]`),{autoAlpha:1},at);
+ };
+ const twinkle = (at,scale) => {
+  tl.set(sparks,{scale,autoAlpha:1},at)
+   .to(sparks,{scale:.55,autoAlpha:0,duration:.27},at);
+ };
+ partyPose('question',11.5);
+ tl.to(star,{x:-20,rotation:-4,duration:.25},11.5)
+  .set(q('[data-pose="question"]'),{scaleX:-1},12.5)
+  .to(star,{x:20,rotation:4,duration:.25},12.5)
+  .to(star,{x:0,rotation:0,duration:.25},13.5)
+  .set(q('.party-stamp'),{autoAlpha:1},13.5)
+  .set(whiteCard,{scale:1.16},13.5)
+  .to(q('.party-card-single,.party-card-after'),{scale:0,autoAlpha:0,duration:.5,ease:'back.in(1.7)'},13.5)
   .to(whiteCard,{
    y:()=>star[0].offsetTop+star[0].offsetHeight*.48-parseFloat(getComputedStyle(whiteCard).top)-whiteCard.clientHeight/2,
    duration:.5,ease:'power2.inOut'
-  },11.5)
-  .to(whiteCard,{autoAlpha:0,duration:.14},12)
-  .set(poses,{autoAlpha:0},12).set(q('[data-pose="whites-toss"]'),{autoAlpha:1},12)
-  .to(star,{y:-9,duration:.24,ease:'sine.out'},12)
-  .to(star,{y:0,duration:.36,ease:'sine.inOut'},12.24)
-  .set(poses,{autoAlpha:0},12.6).set(q('[data-pose="whites-hit"]'),{autoAlpha:1},12.6)
-  .to(star,{y:-20,duration:.12,ease:'power2.out'},12.6)
-  .to(star,{y:0,scaleX:1.04,scaleY:.94,duration:.14,ease:'power2.in'},12.72)
-  .to(star,{scaleX:1,scaleY:1,duration:.04},12.86)
-  .set(poses,{autoAlpha:0},12.9).set(q('[data-pose="whites-cheer"]'),{autoAlpha:1},12.9)
-  .set(star,{scale:.9},12.9)
-  .to(star,{scale:1.05,duration:.11},12.9)
-  .to(star,{scale:1,duration:.17,ease:'sine.inOut'},13.01)
-  .fromTo(sparks,{scale:.25,autoAlpha:0},{scale:1,autoAlpha:1,duration:.12,stagger:.04,immediateRender:false},12.9)
-  .to(sparks,{scale:.5,autoAlpha:0,duration:.16,stagger:.04},13.15)
-  .set(poses,{autoAlpha:0},13.3)
-  .set(poses,{autoAlpha:0},13.5).set(q('[data-pose="run"]'),{autoAlpha:1},13.5)
-  .fromTo(star,{x:-80},{x:0,duration:.7,immediateRender:false},13.5)
-  .set(q('.opening-title'),{autoAlpha:0},21.5);
- for(const [start,end] of [[6.3,9.45],[21.8,25]]){
+  },14)
+  .to(whiteCard,{autoAlpha:0,duration:.14},14.5);
+ for(const beat of [12,13]){
+  tl.to(q('.party-card'),{y:-8,duration:.14,repeat:1,yoyo:true,ease:'sine.inOut'},beat);
+ }
+ partyPose('whites-toss',14.5);
+ tl.to(star,{y:-6,duration:.5,ease:'sine.out'},14.5)
+  .to(star,{y:-11,duration:.16,repeat:1,yoyo:true,ease:'sine.inOut'},15)
+  .to(star,{y:-14,duration:.16,repeat:1,yoyo:true,ease:'sine.inOut'},15.5);
+ partyPose('whites-hit',16);
+ tl.to(star,{y:-20,scaleX:.96,scaleY:1.06,duration:.1,ease:'power2.out'},16)
+  .to(star,{y:0,scaleX:1.08,scaleY:.88,duration:.2,ease:'power2.in'},16.1)
+  .to(star,{scaleX:1,scaleY:1,duration:.18},16.3);
+ twinkle(16,1.4);
+ partyPose('whites-cheer',16.5);
+ tl.set(star,{scale:.9},16.5)
+  .to(star,{scale:1.05,duration:.11},16.5)
+  .to(star,{scale:1,duration:.17,ease:'sine.inOut'},16.61);
+ for(let beat=16.5;beat<=20.5;beat+=.5)twinkle(beat,beat%1?.85:1.12);
+ for(const bar of [17,18,19,20]){
+  tl.to(star,{y:-10,duration:.18,repeat:1,yoyo:true,ease:'sine.inOut'},bar);
+ }
+ tl.to(q('[data-pose="whites-cheer"]'),{autoAlpha:0,duration:.4},21)
+  .to(captions[1],{autoAlpha:0,y:-4,duration:.4},21);
+ partyPose('run',21.5);
+ tl.fromTo(star,{x:-80},{x:0,duration:.7,immediateRender:false},21.5)
+  .set(q('.opening-title'),{autoAlpha:0},29.5);
+ for(const [start,end] of [[6.3,9.45],[29.8,33]]){
   tl.fromTo(star,{scale:1},{scale:1.03,duration:1.6,repeat:1,yoyo:true,ease:'sine.inOut',immediateRender:false},start);
   tl.fromTo(star,{rotation:-3},{rotation:3,duration:.8,repeat:2,yoyo:true,ease:'sine.inOut',immediateRender:false},start);
   for(let t=start+.6;t+.16<end;t+=2.2)tl.to(star,{scaleY:.94,duration:.08},t).to(star,{scaleY:1,duration:.08},t+.08);
@@ -276,7 +294,7 @@ mm.add({reduce:'(prefers-reduced-motion: reduce)', normal:'(prefers-reduced-moti
   .fromTo(titleSplit.lines,{scale:.7,y:15,autoAlpha:0},{scale:1,y:0,autoAlpha:1,stagger:.18,duration:.4,ease:'back.out(1.7)'},3.05)
   .fromTo(q('.title-guest'),{y:20,autoAlpha:0},{y:0,autoAlpha:1,duration:.35},3.45)
   .to(q('.title-card'),{autoAlpha:0,y:-25,duration:.5},5)
-  .set({}, {},25);
+  .set({}, {},33);
  const breath=gsap.to(star,{scale:1.02,duration:2,repeat:-1,yoyo:true,ease:'sine.inOut',paused:true});
  let visible=true;
  tl.eventCallback('onComplete',()=>{if(!reduced&&visible)breath.play();});

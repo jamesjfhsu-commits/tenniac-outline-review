@@ -23,7 +23,8 @@ ANIMATION = """size => {
         timeline.seek(time);
         results[label] = test();
     }
-    check(10.3, 'three cards, correct size, contained and separated', () => {
+    check(10.6, 'all three cards visible during entry', () => cards.every(visible));
+    check(11.4, 'three cards, correct size, contained and separated', () => {
         const boxes = cards.map(card => card.getBoundingClientRect());
         return cards.length === 3 && cards.every(visible) &&
             boxes.every((box, i) => inside(box) &&
@@ -38,7 +39,7 @@ ANIMATION = """size => {
     }
     let overlapCount = 0;
     let layered = true;
-    for (let frame = 690; frame <= 720; frame++) {
+    for (let frame = 840; frame <= 870; frame++) {
         timeline.seek(frame / 60);
         const box = white.getBoundingClientRect();
         if (visible(white) && overlap(box, mascot.getBoundingClientRect())) {
@@ -49,27 +50,48 @@ ANIMATION = """size => {
     }
     results[`white card wins hit testing on ${overlapCount} overlapping frames`] =
         overlapCount > 0 && layered;
-    check(10.9, 'white card stamped', () => visible(select('.party-stamp')));
-    check(11.4, 'other cards hidden', () => cards.filter(card => card !== white)
+    check(13.6, 'white card stamped', () => visible(select('.party-stamp')));
+    const question = select('[data-pose="question"]');
+    check(11.6, 'question faces left', () => pose('question') && gsap.getProperty(question, 'scaleX') === 1);
+    check(12.6, 'question faces right', () => pose('question') && gsap.getProperty(question, 'scaleX') === -1);
+    check(14.05, 'other cards hidden', () => cards.filter(card => card !== white)
         .every(card => !visible(card)));
     const beats = ['toss', 'hit', 'cheer'];
-    for (const [beat, times] of [['toss', [12.05, 12.5]], ['hit', [12.65, 12.85]],
-                                 ['cheer', [12.95, 13.25]]]) {
+    for (const [beat, times] of [['toss', [14.55, 15.9]], ['hit', [16.05, 16.4]],
+                                 ['cheer', [16.6, 18, 20.9]]]) {
         for (const time of times) check(time, beat + ' alone at ' + time, () =>
             beats.every(other => pose('whites-' + other) === (other === beat)));
     }
-    check(12.15, 'all cards hidden', () => cards.every(card => !visible(card)));
-    check(13.45, 'scene two cleared', () => beats.every(beat => !pose('whites-' + beat)) &&
-        !pose('question') &&
+    check(14.65, 'all cards hidden', () => cards.every(card => !visible(card)));
+    check(21.45, 'scene two cleared', () => beats.every(beat => !pose('whites-' + beat)) &&
+        !pose('question') && !visible(select('.caption-scene:nth-child(2)')) &&
         cards.every(card => !visible(card)) &&
         [...document.querySelectorAll('.outfit-sparkles i')].every(spark => !visible(spark)));
-    check(13.5, 'scene three starts with run', () => timeline.labels.s3 === 13.5 && pose('run'));
-    check(15.99, 'ball held until drop', () => !visible(select('#ball')));
-    check(16, 'serve and ball launch on drop', () => pose('serve') && visible(select('#ball')));
+    check(21.5, 'scene three starts with run', () => timeline.labels.s3 === 21.5 && pose('run'));
+    check(23.99, 'ball held until serve', () => !visible(select('#ball')));
+    check(24, 'serve and ball launch on the downbeat', () => pose('serve') && visible(select('#ball')));
     const origin = select('#ball').getBoundingClientRect().left;
-    check(16.1, 'ball advances after serve', () => select('#ball').getBoundingClientRect().left > origin);
-    results['25-second timeline'] = timeline.duration() === 25;
-    timeline.seek(20);
+    check(24.1, 'ball advances after serve', () => select('#ball').getBoundingClientRect().left > origin);
+    const sceneLabels = ['s1', 's2', 's3', 's4', 's5'];
+    const sceneTimes = sceneLabels.map(label => timeline.labels[label]);
+    results[sceneLabels.map((label, i) => label + ' ' + sceneTimes[i].toFixed(1)).join(', ') +
+        '; duration ' + timeline.duration()] =
+        sceneTimes.join(',') === '5.5,9.5,21.5,26,29.5' && timeline.duration() === 33;
+    function transitions(elements) {
+        const targets = new Set(elements);
+        return [...new Set(timeline.getChildren(false, true, false)
+            .filter(tween => tween.duration() === 0 && 'autoAlpha' in tween.vars && tween.startTime() >= 9.5 &&
+                tween.startTime() < 21.5 && tween.targets().some(target => targets.has(target)))
+            .map(tween => tween.startTime()))].sort((a, b) => a - b);
+    }
+    const poseBeats = transitions(document.querySelectorAll('#star .pose'));
+    const stampBeats = transitions([select('.party-stamp')]);
+    const onBeat = time => Math.abs(time - Math.round(time * 2) / 2) <= .02;
+    results['pose swaps on beat: ' + poseBeats.join(', ') + '; stamp: ' + stampBeats.join(', ')] =
+        poseBeats.length === 4 && poseBeats.every((time, i) =>
+            onBeat(time) && Math.abs(time - [11.5, 14.5, 16, 16.5][i]) <= .02) &&
+        stampBeats.length === 1 && onBeat(stampBeats[0]) && Math.abs(stampBeats[0] - 13.5) <= .02;
+    timeline.seek(28);
     const cheer = select('.opening-title h1');
     const lineCount = Math.round(cheer.clientHeight / parseFloat(getComputedStyle(cheer).lineHeight));
     results[`cheer: ${lineCount} lines, scrollWidth=${cheer.scrollWidth}, clientWidth=${cheer.clientWidth}`] =
@@ -104,10 +126,10 @@ def main():
 
             page.evaluate("() => { window.__opening.pause().seek(5); }")
             page.locator("#skip-opening").click()
-            check(width, "skip ends the timeline", page.evaluate("window.__opening.time() === 25"))
+            check(width, "skip ends the timeline", page.evaluate("window.__opening.time() === 33"))
             page.locator("#replay-opening").click()
             check(width, "replay starts again", page.evaluate("window.__opening.time() < 5"))
-            page.evaluate("() => { window.__opening.pause().seek(10.3); }")
+            page.evaluate("() => { window.__opening.pause().seek(11.4); }")
             cards = page.locator(".party-card:visible")
             check(width, "all three cards restored on replay", cards.count() == 3)
 
@@ -133,7 +155,7 @@ def main():
             reduced = browser.new_page(viewport={"width": width, "height": 900}, reduced_motion="reduce")
             reduced.goto(URL, wait_until="networkidle")
             check(width, "reduced motion ends the timeline",
-                  reduced.evaluate("window.__opening.time() === 25 && window.__opening.paused()"))
+                  reduced.evaluate("window.__opening.time() === 33 && window.__opening.paused()"))
             reduced.close()
         browser.close()
 
